@@ -1,13 +1,114 @@
-# React + Vite
+# Notice Board Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive notice board web application built with React, Vite, and Tailwind CSS. This application allows users to view and filter department notices with an intuitive and user-friendly interface.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **User Authentication**: Secure sign-up and sign-in functionality
+- **Notice Browsing**: View a list of notices with previews
+- **Category Filtering**: Filter notices by category
+- **Detailed View**: Examine notices in detail with full content and attachments
+- **Image Carousel**: View and navigate through notice images
+- **Responsive Design**: Fully responsive UI for all device sizes
+- **Mobile-Optimized Filters**: Special filter interface for mobile devices
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-# user-notice
+- **Frontend**: React 19, React Router v6
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **HTTP Client**: Axios
+- **State Management**: React Context API
+- **Deployment**: Vercel
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/notice-board.git
+   cd notice-board
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+   Create a `.env` file in the root directory with the following:
+   ```
+   VITE_API_URL=your_backend_api_url
+   ```
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Project Structure
+
+```
+/
+├── public/             # Static assets
+├── src/
+│   ├── assets/         # Images, fonts, etc.
+│   ├── components/     # Reusable UI components
+│   ├── context/        # React context providers
+│   ├── pages/          # Page components
+│   ├── services/       # API services
+│   ├── App.jsx         # Main application component
+│   ├── config.js       # Application configuration
+│   └── main.jsx        # Application entry point
+├── .gitignore          # Git ignore file
+├── index.html          # HTML entry point
+├── package.json        # Project dependencies and scripts
+├── tailwind.config.js  # Tailwind CSS configuration
+└── vite.config.js      # Vite configuration
+```
+
+## Components
+
+- **Navbar**: Navigation bar with authentication status
+- **NoticeCard**: Card component for displaying notice previews
+- **NoticeDetail**: Component for detailed notice view
+- **CategoryFilter**: Filter interface for notice categories
+- **ImageCarousel**: Component for viewing and navigating notice images
+
+## Pages
+
+- **SignupPage**: User registration page
+- **SigninPage**: User login page
+- **NoticePage**: Main page for viewing notices
+
+## API Integration
+
+The application communicates with a backend API using Axios. The API endpoints include:
+
+- `/signup`: User registration
+- `/signin`: User authentication
+- `/notices`: Fetching notice data
+
+## Deployment
+
+The application is configured for deployment on Vercel with the provided `vercel.json` configuration.
+
+## Development
+
+### Running in Development Mode
+
+```bash
+npm run dev
+```
+
+### Building for Production
+
+```bash
+npm run build
+```
+
+### Previewing Production Build
+
+```bash
+npm run preview
+```
+
