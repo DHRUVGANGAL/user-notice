@@ -2,40 +2,59 @@ import React from 'react';
 import ImageCarousel from './ImageCarousel';
 
 const NoticeDetail = ({ notice, onPrevious, onNext, currentIndex, totalCount }) => {
-  if (!notice) return null;
+  
+  if (!notice) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6 text-center">
+        <p className="text-gray-600">Notice not found or data is unavailable.</p>
+      </div>
+    );
+  }
 
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    try {
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Date unavailable';
+    }
   };
   
-  
+ 
   const getImageFiles = () => {
     const images = [];
     
-   
-    if (notice.fileUrl && notice.fileType === 'image') {
-      images.push({
-        url: notice.fileUrl,
-        originalName: notice.title,
-        type: 'image'
-      });
-    }
-    
-    
-    if (notice.files && notice.files.length > 0) {
-      notice.files.forEach(file => {
-        
-        if (file.fileType === 'image' || 
-            file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) ||
-            (file.mimetype && file.mimetype.startsWith('image/'))) {
-          images.push({
-            url: file.url,
-            originalName: file.originalName,
-            type: 'image'
-          });
-        }
-      });
+    try {
+     
+      if (notice.fileUrl && notice.fileType === 'image') {
+        images.push({
+          url: notice.fileUrl,
+          originalName: notice.title || 'Main image',
+          type: 'image'
+        });
+      }
+      
+      
+      if (notice.files && Array.isArray(notice.files) && notice.files.length > 0) {
+        notice.files.forEach(file => {
+          if (
+            file && (
+              (file.fileType === 'image') || 
+              (file.url && file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i)) ||
+              (file.mimetype && file.mimetype.startsWith('image/'))
+            )
+          ) {
+            images.push({
+              url: file.url,
+              originalName: file.originalName || `Image ${images.length + 1}`,
+              type: 'image'
+            });
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error processing image files:', error);
     }
     
     return images;
@@ -43,35 +62,60 @@ const NoticeDetail = ({ notice, onPrevious, onNext, currentIndex, totalCount }) 
   
   
   const getAttachmentFiles = () => {
-    if (!notice.files || notice.files.length === 0) return [];
+    if (!notice.files || !Array.isArray(notice.files) || notice.files.length === 0) {
+      return [];
+    }
     
-    return notice.files.filter(file => 
-      file.fileType !== 'image' && 
-      !file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) &&
-      !(file.mimetype && file.mimetype.startsWith('image/'))
-    );
+    try {
+      return notice.files.filter(file => 
+        file && 
+        file.url && 
+        file.fileType !== 'image' && 
+        !file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) &&
+        !(file.mimetype && file.mimetype.startsWith('image/'))
+      );
+    } catch (error) {
+      console.error('Error processing attachment files:', error);
+      return [];
+    }
   };
   
   const imageFiles = getImageFiles();
   const attachmentFiles = getAttachmentFiles();
   
- 
+
   const createMarkup = (htmlContent) => {
-    return { __html: htmlContent };
+    try {
+      if (typeof htmlContent === 'string') {
+        return { __html: htmlContent };
+      }
+      return { __html: '' };
+    } catch (error) {
+      console.error('Error creating markup:', error);
+      return { __html: '' };
+    }
   };
   
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="p-4">
-       
+        
         <div className="flex items-center mb-4">
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            notice.category === 'Administrative' 
-              ? 'bg-blue-100 text-blue-800' 
-              : 'bg-green-100 text-green-800'
-          }`}>
-            {notice.category}
-          </span>
+          {notice.category && (
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              notice.category === 'Administrative' 
+                ? 'bg-blue-100 text-blue-800' 
+                : notice.category === 'Events'
+                  ? 'bg-purple-100 text-purple-800'
+                  : notice.category === 'Academic'
+                    ? 'bg-green-100 text-green-800'
+                    : notice.category === 'Examinations'
+                      ? 'bg-orange-100 text-orange-800'
+                      : 'bg-gray-100 text-gray-800'
+            }`}>
+              {notice.category}
+            </span>
+          )}
           
           
           {notice.isImportant && (
@@ -83,54 +127,64 @@ const NoticeDetail = ({ notice, onPrevious, onNext, currentIndex, totalCount }) 
             </span>
           )}
           
-          <span className="text-gray-600 text-sm ml-auto">{formatDate(notice.createdAt)}</span>
+         
+          {notice.createdAt && (
+            <span className="text-gray-600 text-sm ml-auto">{formatDate(notice.createdAt)}</span>
+          )}
         </div>
         
-      
-        <h2 className="text-xl font-bold text-gray-800 mb-4">{notice.title}</h2>
         
+        <h2 className="text-xl font-bold text-gray-800 mb-4">{notice.title || 'Untitled Notice'}</h2>
         
-        <div 
-          className="text-gray-700 mb-4"
-          dangerouslySetInnerHTML={createMarkup(notice.content)}
-        />
+       
+        {notice.content && (
+          <div 
+            className="text-gray-700 mb-4 prose max-w-none"
+            dangerouslySetInnerHTML={createMarkup(notice.content)}
+          />
+        )}
       </div>
       
       
-      <ImageCarousel images={imageFiles} />
+      {imageFiles.length > 0 && (
+        <ImageCarousel images={imageFiles} />
+      )}
+      
       
       {attachmentFiles.length > 0 && (
         <div className="p-4 border-t">
           <h3 className="text-gray-700 font-medium mb-2">Attachments</h3>
           
-          {attachmentFiles.map((file, index) => (
-            <div key={index} className="bg-gray-100 p-3 rounded flex justify-between items-center mb-2 last:mb-0">
-              <span className="text-gray-700">
-                {file.originalName || `attachment-${index + 1}.pdf`}
-              </span>
-              
-              <a 
-                href={file.url} 
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center text-sm"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Download
-              </a>
-            </div>
-          ))}
+          <div className="space-y-2">
+            {attachmentFiles.map((file, index) => (
+              <div key={index} className="bg-gray-100 p-3 rounded flex justify-between items-center">
+                <span className="text-gray-700 truncate max-w-xs">
+                  {file.originalName || `attachment-${index + 1}.pdf`}
+                </span>
+                
+                <a 
+                  href={file.url} 
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center text-sm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download
+                </a>
+              </div>
+            ))}
+          </div>
         </div>
       )}
       
-     
-      <div className="flex justify-between p-2 bg-gray-100 border-t mt-4">
+      <div className="flex justify-between p-3 bg-gray-100 border-t mt-4">
         <button 
           className="flex items-center text-indigo-600 hover:text-indigo-800 px-2 py-1"
           onClick={onPrevious}
+          aria-label="Previous notice"
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
@@ -150,13 +204,17 @@ const NoticeDetail = ({ notice, onPrevious, onNext, currentIndex, totalCount }) 
           Previous Notice
         </button>
         
-        <div className="text-gray-600 text-sm">
-          {currentIndex + 1} / {totalCount}
-        </div>
+       
+        {typeof currentIndex === 'number' && typeof totalCount === 'number' && (
+          <div className="text-gray-600 text-sm self-center">
+            {currentIndex + 1} / {totalCount}
+          </div>
+        )}
         
         <button 
           className="flex items-center text-indigo-600 hover:text-indigo-800 px-2 py-1"
           onClick={onNext}
+          aria-label="Next notice"
         >
           Next Notice
           <svg 

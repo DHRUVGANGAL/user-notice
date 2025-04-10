@@ -1,22 +1,40 @@
 import React, { useState, useEffect } from 'react';
 
 const ImageCarousel = ({ images }) => {
-  // Deduplicate images based on URL
-  const uniqueImages = images ? [...new Map(images.map(img => [img.url, img])).values()] : [];
+  
+  const uniqueImages = images && images.length > 0 
+    ? [...new Map(images.map(img => [img.url, img])).values()] 
+    : [];
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const zoomRef = React.useRef(null);
   
-  if (!uniqueImages || uniqueImages.length === 0) return null;
+ 
+  if (!uniqueImages || uniqueImages.length === 0) {
+    return null;
+  }
   
-  const goToPrevious = () => {
+
+  useEffect(() => {
+    if (currentIndex >= uniqueImages.length) {
+      setCurrentIndex(0);
+    }
+  }, [uniqueImages, currentIndex]);
+  
+  const goToPrevious = (e) => {
+    if (e) {
+      e.stopPropagation();
+    }
     const isFirstImage = currentIndex === 0;
     const newIndex = isFirstImage ? uniqueImages.length - 1 : currentIndex - 1;
     setCurrentIndex(newIndex);
   };
   
-  const goToNext = () => {
+  const goToNext = (e) => {
+    if (e) {
+      e.stopPropagation();
+    }
     const isLastImage = currentIndex === uniqueImages.length - 1;
     const newIndex = isLastImage ? 0 : currentIndex + 1;
     setCurrentIndex(newIndex);
@@ -27,7 +45,20 @@ const ImageCarousel = ({ images }) => {
     setIsZoomed(!isZoomed);
   };
   
+
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (isZoomed) {
+        if (e.key === 'ArrowLeft') {
+          goToPrevious();
+        } else if (e.key === 'ArrowRight') {
+          goToNext();
+        } else if (e.key === 'Escape') {
+          setIsZoomed(false);
+        }
+      }
+    };
+    
     if (isZoomed) {
       document.addEventListener('keydown', handleKeyDown);
       if (zoomRef.current) {
@@ -36,10 +67,11 @@ const ImageCarousel = ({ images }) => {
     } else {
       document.removeEventListener('keydown', handleKeyDown);
     }
+    
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isZoomed]);
+  }, [isZoomed, currentIndex, uniqueImages.length]);
   
   const handleZoomClick = (e) => {
     if (!e.target.closest('button')) {
@@ -47,23 +79,12 @@ const ImageCarousel = ({ images }) => {
     }
   };
   
-  const handleKeyDown = (e) => {
-    if (isZoomed) {
-      if (e.key === 'ArrowLeft') {
-        goToPrevious();
-      } else if (e.key === 'ArrowRight') {
-        goToNext();
-      } else if (e.key === 'Escape') {
-        setIsZoomed(false);
-      }
-    }
-  };
-  
-  // Check if we need to show image counter
+
   const showCounter = uniqueImages.length > 1;
   
   return (
     <div className="relative bg-gray-100 border-t border-b">
+      
       {isZoomed && (
         <div
           className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center"
@@ -99,10 +120,7 @@ const ImageCarousel = ({ images }) => {
             {showCounter && (
               <>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    goToPrevious();
-                  }}
+                  onClick={(e) => goToPrevious(e)}
                   className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-3 focus:outline-none"
                   aria-label="Previous image"
                 >
@@ -117,10 +135,7 @@ const ImageCarousel = ({ images }) => {
                   </svg>
                 </button>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    goToNext();
-                  }}
+                  onClick={(e) => goToNext(e)}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-3 focus:outline-none"
                   aria-label="Next image"
                 >
@@ -143,11 +158,12 @@ const ImageCarousel = ({ images }) => {
         </div>
       )}
       
-      <div className="relative h-64 md:h-96">
+    
+      <div className="relative w-full" style={{ minHeight: '200px', maxHeight: '600px' }}>
         <img
           src={uniqueImages[currentIndex].url}
           alt={uniqueImages[currentIndex].originalName || "Notice image"}
-          className="w-full h-full object-contain cursor-zoom-in"
+          className="w-full h-auto max-h-[600px] object-contain cursor-zoom-in mx-auto"
           onClick={toggleZoom}
         />
         {showCounter && (
@@ -157,10 +173,11 @@ const ImageCarousel = ({ images }) => {
         )}
       </div>
       
+      
       {showCounter && (
         <>
           <button
-            onClick={goToPrevious}
+            onClick={(e) => goToPrevious(e)}
             className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full p-2 focus:outline-none"
             aria-label="Previous image"
           >
@@ -175,7 +192,7 @@ const ImageCarousel = ({ images }) => {
             </svg>
           </button>
           <button
-            onClick={goToNext}
+            onClick={(e) => goToNext(e)}
             className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full p-2 focus:outline-none"
             aria-label="Next image"
           >

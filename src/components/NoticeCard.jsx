@@ -2,48 +2,80 @@ import React from 'react';
 import ImageCarousel from './ImageCarousel';
 
 const NoticeCard = ({ notice, onClick }) => {
+  
+  if (!notice) {
+    return null;
+  }
+
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    try {
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Date unavailable';
+    }
   };
+  
   
   const getImageFiles = () => {
     const images = [];
     
-    if (notice.fileUrl && notice.fileType === 'image') {
-      images.push({
-        url: notice.fileUrl,
-        originalName: notice.title,
-        type: 'image'
-      });
-    }
-    
-    if (notice.files && notice.files.length > 0) {
-      notice.files.forEach(file => {
-        if (file.fileType === 'image' || 
-            file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) ||
-            (file.mimetype && file.mimetype.startsWith('image/'))) {
-          images.push({
-            url: file.url,
-            originalName: file.originalName,
-            type: 'image'
-          });
-        }
-      });
+    try {
+      
+      if (notice.fileUrl && notice.fileType === 'image') {
+        images.push({
+          url: notice.fileUrl,
+          originalName: notice.title || 'Main image',
+          type: 'image'
+        });
+      }
+      
+     
+      if (notice.files && Array.isArray(notice.files) && notice.files.length > 0) {
+        notice.files.forEach(file => {
+          if (
+            file && (
+              (file.fileType === 'image') || 
+              (file.url && file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i)) ||
+              (file.mimetype && file.mimetype.startsWith('image/'))
+            )
+          ) {
+            images.push({
+              url: file.url,
+              originalName: file.originalName || `Image ${images.length + 1}`,
+              type: 'image'
+            });
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error processing image files:', error);
     }
     
     return images;
   };
   
+  
   const hasAttachments = () => {
-    if (!notice.files || notice.files.length === 0) return false;
+    if (!notice.files || !Array.isArray(notice.files) || notice.files.length === 0) {
+      return false;
+    }
     
-    return notice.files.some(file => 
-      file.fileType !== 'image' && 
-      !file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) &&
-      !(file.mimetype && file.mimetype.startsWith('image/'))
-    );
+    try {
+      return notice.files.some(file => 
+        file && 
+        file.url && 
+        file.fileType !== 'image' && 
+        !file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) &&
+        !(file.mimetype && file.mimetype.startsWith('image/'))
+      );
+    } catch (error) {
+      console.error('Error checking attachments:', error);
+      return false;
+    }
   };
+  
   
   const handleCardClick = (e) => {
     if (!e.target.closest('button') && !e.target.closest('a')) {
@@ -59,15 +91,25 @@ const NoticeCard = ({ notice, onClick }) => {
       onClick={handleCardClick}
     >
       <div className="p-4">
+        
         <div className="flex items-center mb-4">
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            notice.category === 'Administrative'
-              ? 'bg-blue-100 text-blue-800'
-              : 'bg-green-100 text-green-800'
-          }`}>
-            {notice.category}
-          </span>
+          {notice.category && (
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              notice.category === 'Administrative'
+                ? 'bg-blue-100 text-blue-800'
+                : notice.category === 'Events'
+                  ? 'bg-purple-100 text-purple-800'
+                  : notice.category === 'Academic'
+                    ? 'bg-green-100 text-green-800'
+                    : notice.category === 'Examinations'
+                      ? 'bg-orange-100 text-orange-800'
+                      : 'bg-gray-100 text-gray-800'
+            }`}>
+              {notice.category}
+            </span>
+          )}
           
+         
           {notice.isImportant && (
             <span className="flex items-center text-red-600 text-sm font-medium ml-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -77,18 +119,30 @@ const NoticeCard = ({ notice, onClick }) => {
             </span>
           )}
           
-          <span className="text-gray-600 text-sm ml-auto">
-            {formatDate(notice.createdAt)}
-          </span>
+          
+          {notice.createdAt && (
+            <span className="text-gray-600 text-sm ml-auto">
+              {formatDate(notice.createdAt)}
+            </span>
+          )}
         </div>
         
-        <h3 className="text-xl font-semibold text-gray-800 mb-3">{notice.title}</h3>
+        <h3 className="text-xl font-semibold text-gray-800 mb-3">{notice.title || 'Untitled Notice'}</h3>
         
-        {/* Content is removed - will only show in detail view */}
+        
+        {notice.content && typeof notice.content === 'string' && (
+          <div className="text-gray-600 text-sm mb-3 line-clamp-2">
+            {notice.content.replace(/<[^>]*>/g, '').slice(0, 120)}
+            {notice.content.replace(/<[^>]*>/g, '').length > 120 ? '...' : ''}
+          </div>
+        )}
       </div>
       
-      {/* Keep the image carousel */}
-      {imageFiles.length > 0 && <ImageCarousel images={imageFiles} />}
+     
+      {imageFiles.length > 0 && (
+        <ImageCarousel images={imageFiles} />
+      )}
+      
       
       <div className="p-3 border-t">
         <div className="flex items-center text-gray-500 text-sm">
