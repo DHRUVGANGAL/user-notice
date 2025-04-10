@@ -1,4 +1,3 @@
-// src/pages/NoticePage.js - Updated with a new back button
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchNotices } from '../services/api';
@@ -15,18 +14,18 @@ const NoticePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // State for detail view
+
   const [selectedNoticeIndex, setSelectedNoticeIndex] = useState(null);
   const [showDetailView, setShowDetailView] = useState(false);
 
-  // Redirect to sign in if not authenticated
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/signin');
     }
   }, [isAuthenticated, navigate]);
 
-  // Fetch notices from the API
+ 
   useEffect(() => {
     const getNotices = async () => {
       try {
@@ -36,7 +35,7 @@ const NoticePage = () => {
         if (response.success) {
           setNotices(response.data);
           
-          // Extract unique categories from notices
+          
           const uniqueCategories = [...new Set(
             response.data
               .filter(notice => notice.category)
@@ -59,26 +58,26 @@ const NoticePage = () => {
     }
   }, [isAuthenticated]);
 
-  // Filter notices by selected category
+  
   const filteredNotices = selectedCategory === 'All'
     ? notices
     : notices.filter(notice => notice.category === selectedCategory);
 
-  // Handle category change
+  
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-    // Reset detail view when changing categories
+    
     setShowDetailView(false);
     setSelectedNoticeIndex(null);
   };
 
-  // Open notice detail view
+  
   const openNoticeDetail = (index) => {
     setSelectedNoticeIndex(index);
     setShowDetailView(true);
   };
 
-  // Handle navigation in detail view
+
   const goToPreviousNotice = () => {
     setSelectedNoticeIndex(prev => 
       prev === 0 ? filteredNotices.length - 1 : prev - 1
@@ -91,7 +90,7 @@ const NoticePage = () => {
     );
   };
 
-  // Close detail view
+
   const closeDetailView = () => {
     setShowDetailView(false);
     setSelectedNoticeIndex(null);
@@ -101,21 +100,21 @@ const NoticePage = () => {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Department Notices</h1>
 
-      {/* Error message */}
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
           <span className="block sm:inline">{error}</span>
         </div>
       )}
 
-      {/* Loading state */}
+
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
       ) : (
         <>
-          {/* Category filters */}
+
           <div className="mb-6">
             <h2 className="text-lg font-medium mb-2">Filter by Category</h2>
             <div className="flex flex-wrap gap-2">
@@ -146,17 +145,17 @@ const NoticePage = () => {
             </div>
           </div>
 
-          {/* No notices message */}
+          
           {filteredNotices.length === 0 && (
             <div className="bg-gray-50 p-6 rounded-lg text-center">
               <p className="text-gray-500">No notices available{selectedCategory !== 'All' ? ` in category "${selectedCategory}"` : ''}.</p>
             </div>
           )}
 
-          {/* Detail View */}
+          
           {showDetailView && selectedNoticeIndex !== null && (
             <div className="mb-6">
-              {/* Updated Back to notices button */}
+             
               <button 
                 onClick={closeDetailView}
                 className="flex items-center text-indigo-600 hover:text-indigo-800 mb-4"
@@ -189,7 +188,7 @@ const NoticePage = () => {
             </div>
           )}
 
-          {/* Notices List - Full width */}
+          
           {!showDetailView && (
             <div className="space-y-6">
               {filteredNotices.map((notice, index) => (
