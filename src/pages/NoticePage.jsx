@@ -103,7 +103,7 @@ const NoticePage = () => {
         </div>
       ) : (
         <>
-          {/* Replaced the original filter with our new CategoryFilter component */}
+         
           <CategoryFilter 
             categories={categories} 
             selectedCategory={selectedCategory} 

@@ -144,7 +144,7 @@ const CategoryFilter = ({ categories = [], selectedCategory = 'All', onCategoryC
                   </div>
                   
                   
-                  {Array.from(new Set(['Academic', 'Events', 'Exam', 'Examinations', 'Placements', 'Administrative', 
+                  {Array.from(new Set(['Academic', 'Events', 'Examinations', 'Placements', 'Administrative', 
                     ...(Array.isArray(categories) ? categories : []).filter(cat => 
                       !['Academic', 'Events', 'Exam', 'Examinations', 'Placements', 'Administrative'].includes(cat)
                     )
