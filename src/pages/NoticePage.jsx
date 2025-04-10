@@ -4,6 +4,7 @@ import { fetchNotices } from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import NoticeCard from '../components/NoticeCard';
 import NoticeDetail from '../components/NoticeDetail';
+import CategoryFilter from '../components/CategoryFilter';
 
 const NoticePage = () => {
   const { isAuthenticated } = useContext(AuthContext);
@@ -14,10 +15,8 @@ const NoticePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-
   const [selectedNoticeIndex, setSelectedNoticeIndex] = useState(null);
   const [showDetailView, setShowDetailView] = useState(false);
-
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -25,7 +24,6 @@ const NoticePage = () => {
     }
   }, [isAuthenticated, navigate]);
 
- 
   useEffect(() => {
     const getNotices = async () => {
       try {
@@ -34,7 +32,6 @@ const NoticePage = () => {
         
         if (response.success) {
           setNotices(response.data);
-          
           
           const uniqueCategories = [...new Set(
             response.data
@@ -57,26 +54,21 @@ const NoticePage = () => {
       getNotices();
     }
   }, [isAuthenticated]);
-
   
   const filteredNotices = selectedCategory === 'All'
     ? notices
     : notices.filter(notice => notice.category === selectedCategory);
-
   
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-    
     setShowDetailView(false);
     setSelectedNoticeIndex(null);
   };
-
   
   const openNoticeDetail = (index) => {
     setSelectedNoticeIndex(index);
     setShowDetailView(true);
   };
-
 
   const goToPreviousNotice = () => {
     setSelectedNoticeIndex(prev => 
@@ -90,7 +82,6 @@ const NoticePage = () => {
     );
   };
 
-
   const closeDetailView = () => {
     setShowDetailView(false);
     setSelectedNoticeIndex(null);
@@ -100,13 +91,11 @@ const NoticePage = () => {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Department Notices</h1>
 
-
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
           <span className="block sm:inline">{error}</span>
         </div>
       )}
-
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
@@ -114,48 +103,21 @@ const NoticePage = () => {
         </div>
       ) : (
         <>
-
-          <div className="mb-6">
-            <h2 className="text-lg font-medium mb-2">Filter by Category</h2>
-            <div className="flex flex-wrap gap-2">
-              <button
-                className={`px-4 py-2 rounded-full text-sm font-medium ${
-                  selectedCategory === 'All' 
-                    ? 'bg-indigo-600 text-white' 
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-                onClick={() => handleCategoryChange('All')}
-              >
-                All
-              </button>
-              
-              {categories.map(category => (
-                <button
-                  key={category}
-                  className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    selectedCategory === category 
-                      ? (category === 'Administrative' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white')
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                  onClick={() => handleCategoryChange(category)}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
-
+          {/* Replaced the original filter with our new CategoryFilter component */}
+          <CategoryFilter 
+            categories={categories} 
+            selectedCategory={selectedCategory} 
+            onCategoryChange={handleCategoryChange} 
+          />
           
           {filteredNotices.length === 0 && (
             <div className="bg-gray-50 p-6 rounded-lg text-center">
               <p className="text-gray-500">No notices available{selectedCategory !== 'All' ? ` in category "${selectedCategory}"` : ''}.</p>
             </div>
           )}
-
           
           {showDetailView && selectedNoticeIndex !== null && (
             <div className="mb-6">
-             
               <button 
                 onClick={closeDetailView}
                 className="flex items-center text-indigo-600 hover:text-indigo-800 mb-4"
@@ -187,7 +149,6 @@ const NoticePage = () => {
               />
             </div>
           )}
-
           
           {!showDetailView && (
             <div className="space-y-6">

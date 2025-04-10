@@ -2,15 +2,13 @@ import React from 'react';
 import ImageCarousel from './ImageCarousel';
 
 const NoticeCard = ({ notice, onClick }) => {
-  
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
-
+  
   const getImageFiles = () => {
     const images = [];
-    
     
     if (notice.fileUrl && notice.fileType === 'image') {
       images.push({
@@ -20,10 +18,8 @@ const NoticeCard = ({ notice, onClick }) => {
       });
     }
     
-    
     if (notice.files && notice.files.length > 0) {
       notice.files.forEach(file => {
-        
         if (file.fileType === 'image' || 
             file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) ||
             (file.mimetype && file.mimetype.startsWith('image/'))) {
@@ -39,49 +35,38 @@ const NoticeCard = ({ notice, onClick }) => {
     return images;
   };
   
- 
-  const getAttachmentFiles = () => {
-    if (!notice.files || notice.files.length === 0) return [];
+  const hasAttachments = () => {
+    if (!notice.files || notice.files.length === 0) return false;
     
-    return notice.files.filter(file => 
+    return notice.files.some(file => 
       file.fileType !== 'image' && 
       !file.url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i) &&
       !(file.mimetype && file.mimetype.startsWith('image/'))
     );
   };
   
-  const imageFiles = getImageFiles();
-  const attachmentFiles = getAttachmentFiles();
-  
- 
   const handleCardClick = (e) => {
-   
     if (!e.target.closest('button') && !e.target.closest('a')) {
       onClick();
     }
   };
   
+  const imageFiles = getImageFiles();
   
-  const createMarkup = (htmlContent) => {
-    return { __html: htmlContent };
-  };
-
   return (
-    <div 
-      className="bg-white rounded-lg shadow-md overflow-hidden mb-6"
+    <div
+      className="bg-white rounded-lg shadow-md overflow-hidden mb-6 cursor-pointer hover:shadow-lg transition-shadow duration-200"
       onClick={handleCardClick}
     >
-      
       <div className="p-4">
         <div className="flex items-center mb-4">
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            notice.category === 'Administrative' 
-              ? 'bg-blue-100 text-blue-800' 
+            notice.category === 'Administrative'
+              ? 'bg-blue-100 text-blue-800'
               : 'bg-green-100 text-green-800'
           }`}>
             {notice.category}
           </span>
-          
           
           {notice.isImportant && (
             <span className="flex items-center text-red-600 text-sm font-medium ml-2">
@@ -97,47 +82,33 @@ const NoticeCard = ({ notice, onClick }) => {
           </span>
         </div>
         
-        
         <h3 className="text-xl font-semibold text-gray-800 mb-3">{notice.title}</h3>
         
-       
-        <div 
-          className="text-gray-700 mb-4" 
-          dangerouslySetInnerHTML={createMarkup(notice.content)}
-        />
+        {/* Content is removed - will only show in detail view */}
       </div>
       
-      
+      {/* Keep the image carousel */}
       {imageFiles.length > 0 && <ImageCarousel images={imageFiles} />}
       
-      
-      {attachmentFiles.length > 0 && (
-        <div className="p-4 border-t">
-          <h3 className="text-gray-700 font-medium mb-2">Attachments</h3>
+      <div className="p-3 border-t">
+        <div className="flex items-center text-gray-500 text-sm">
+          {hasAttachments() && (
+            <span className="flex items-center mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+              Attachments
+            </span>
+          )}
           
-          {attachmentFiles.map((file, index) => (
-            <div key={index} className="bg-gray-100 p-3 rounded flex justify-between items-center mb-2 last:mb-0">
-              <span className="text-gray-700">
-                {file.originalName || `attachment-${index + 1}.pdf`}
-              </span>
-              
-              <a 
-                href={file.url} 
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center text-sm"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Download
-              </a>
-            </div>
-          ))}
+          <span className="text-indigo-600 ml-auto flex items-center">
+            View details
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </span>
         </div>
-      )}
+      </div>
     </div>
   );
 };
