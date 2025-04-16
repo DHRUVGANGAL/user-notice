@@ -88,8 +88,8 @@ const NoticePage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Department Notices</h1>
+    <div className="max-w-4xl mx-auto px-4 py-8 ">
+      <h1 className="text-2xl font-bold text-gray-900 mb-6 dark:text-white">Department Notices</h1>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
