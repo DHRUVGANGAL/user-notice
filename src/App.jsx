@@ -2,10 +2,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-
 // Components
 import Navbar from './components/Navbar';
-
 // Pages
 import SignupPage from './pages/SignupPage';
 import SigninPage from './pages/SigninPage';
@@ -15,7 +13,7 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
           <Navbar />
           <Routes>
             <Route path="/" element={<Navigate to="/notices" />} />
