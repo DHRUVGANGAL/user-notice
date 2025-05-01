@@ -14,9 +14,9 @@ A modern, responsive notice board web application built with React, Vite, and Ta
 
 ## Tech Stack
 
-- **Frontend**: React 19, React Router v6
+- **Frontend**: React 19, React router v6
 - **Build Tool**: Vite
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind 
 - **HTTP Client**: Axios
 - **State Management**: React Context API
 - **Deployment**: Vercel
